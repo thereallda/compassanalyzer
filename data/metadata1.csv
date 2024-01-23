@@ -1,0 +1,7 @@
+id,condition,replicate,enrich
+Y1_CRNT,WT.Input,1,Input
+Y2_CRNT,WT.Input,2,Input
+Y3_CRNT,WT.Input,3,Input
+Y1_YCNT,WT.Enrich,1,Enrich
+Y2_YCNT,WT.Enrich,2,Enrich
+Y3_YCNT,WT.Enrich,3,Enrich
