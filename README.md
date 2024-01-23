@@ -8,11 +8,11 @@
 
 ## Installation
 
-You can install the development version of qNCIN like so:
+You can install the development version of compassanalyzer like so:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("thereallda/qNCIN")
+devtools::install_github("thereallda/compassanalyzer")
 ```
 
 ## Quick Start
