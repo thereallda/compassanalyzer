@@ -20,9 +20,8 @@ setClass(
 #'
 #' @param data A un-normalized count data matrix of shape n x p, where n is the
 #'   number of samples and p is the number of features.
-#' @param bio.group Vector of samples group, e.g., c("Young.Input","Young.Enrich","Old.Input","Old.Enrich").
-#' @param enrich.group Vector of enrichment group, e.g., c("Input","Enrich","Input","Enrich").
-#' @param batch.group Vector of samples batch, e.g., c("A","A","B","B"), default: NULL.
+#' @param col.data \code{data.frame} with at least two columns (indicate condition and enrich groups).
+#'   Rows of \code{col.data} correspond to columns of \code{data}.
 #' @param spike.in.prefix A character specify the prefix of spike-in id, e.g., "^FB" stands for gene id of fly spike-in , default: NULL.
 #' @param input.id Input library id, must be consistent with \code{enrich.group}, e.g., "Input".
 #' @param enrich.id Enrich library id, must be consistent with \code{enrich.group}, e.g., "Enrich".
@@ -45,14 +44,12 @@ setClass(
 #' @importFrom S4Vectors DataFrame
 #' @importFrom SummarizedExperiment SummarizedExperiment
 createCompass <- function(data,
-                        bio.group,
-                        enrich.group,
-                        batch.group = NULL,
-                        spike.in.prefix = NULL,
-                        input.id = "Input",
-                        enrich.id = "Enrich",
-                        synthetic.id = NULL
-                        ) {
+                          col.data,
+                          spike.in.prefix = NULL,
+                          input.id = "Input",
+                          enrich.id = "Enrich",
+                          synthetic.id = NULL
+                          ) {
 
   # parameters
   params <- list(
@@ -85,13 +82,21 @@ createCompass <- function(data,
   ## colData for mapping samples
   colDf <- S4Vectors::DataFrame(
     id = colnames(data),
-    condition = bio.group,
-    enrich = enrich.group,
-    replicate = enONE::countReplicate(bio.group),
-    batch = NA_character_
+    col.data
   )
+  # check condition column
+  if (is.null(col.data$condition)) {
+    stop("col.data must have a condition column to specify the grouping of samples.")
+  } else {
+    colDf$replicate <- countReplicate(colDf$condition)
+  }
 
-  if (!is.null(batch.group)) colDf$batch <- batch.group
+  # check enrich column
+  if (is.null(col.data$enrich)) {
+    stop("col.data must have a enrich column to specify the enrichment grouping of samples.")
+  }
+
+  if (is.null(col.data$batch)) colDf$batch <- NA_character_
   # create SummarizedExperiment object
   se <- SummarizedExperiment::SummarizedExperiment(S4Vectors::SimpleList(as.matrix(data)),
                                                    colData = colDf,

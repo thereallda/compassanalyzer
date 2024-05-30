@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# compassanalyzer
+# compassanalyzer <a href="https://github.com/thereallda/compassanalyzer"><img src="man/figures/logo.jpg" alt="CompassAnalyzer" align="right" height="138"/></a>
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -34,6 +34,16 @@ library(compassanalyzer)
 ``` r
 counts_df <- read.csv("data/Counts1.csv", row.names = 1)
 meta <- read.csv("data/metadata1.csv")
+head(meta)
+#>        id condition replicate enrich
+#> 1 Y1_CRNT  WT.Input         1  Input
+#> 2 Y2_CRNT  WT.Input         2  Input
+#> 3 Y3_CRNT  WT.Input         3  Input
+#> 4 Y1_YCNT WT.Enrich         1 Enrich
+#> 5 Y2_YCNT WT.Enrich         2 Enrich
+#> 6 Y3_YCNT WT.Enrich         3 Enrich
+# rownames of metadata should be consistent with the colnames of counts_mat
+rownames(meta) <- meta$id
 
 # metadata for synthetic RNA
 syn_id <- paste("syn",3:7, sep = "_")
@@ -46,17 +56,16 @@ syn_meta <- data.frame(
 ### Filtering
 
 ``` r
-counts_keep <- enONE::FilterLowExprGene(counts_df, 
-                                 group = meta$condition,
-                                 min.count = 20)
+counts_keep <- enONE::FilterLowExprGene(counts_df,
+                                        group = meta$condition,
+                                        min.count = 20)
 ```
 
 ### Create object
 
 ``` r
 Compass <- createCompass(counts_keep,
-                         bio.group = meta$condition,
-                         enrich.group = meta$enrich,
+                         col.data = meta,
                          spike.in.prefix = "^FB",
                          input.id = "Input",
                          enrich.id = "Enrich",

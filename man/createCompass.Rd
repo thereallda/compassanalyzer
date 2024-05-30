@@ -8,9 +8,7 @@
 \usage{
 createCompass(
   data,
-  bio.group,
-  enrich.group,
-  batch.group = NULL,
+  col.data,
   spike.in.prefix = NULL,
   input.id = "Input",
   enrich.id = "Enrich",
@@ -21,11 +19,8 @@ createCompass(
 \item{data}{A un-normalized count data matrix of shape n x p, where n is the
 number of samples and p is the number of features.}
 
-\item{bio.group}{Vector of samples group, e.g., c("Young.Input","Young.Enrich","Old.Input","Old.Enrich").}
-
-\item{enrich.group}{Vector of enrichment group, e.g., c("Input","Enrich","Input","Enrich").}
-
-\item{batch.group}{Vector of samples batch, e.g., c("A","A","B","B"), default: NULL.}
+\item{col.data}{\code{data.frame} with at least two columns (indicate condition and enrich groups).
+Rows of \code{col.data} correspond to columns of \code{data}.}
 
 \item{spike.in.prefix}{A character specify the prefix of spike-in id, e.g., "^FB" stands for gene id of fly spike-in , default: NULL.}
 

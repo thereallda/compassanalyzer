@@ -13,11 +13,10 @@ knitr::opts_chunk$set(
 )
 ```
 
-# compassanalyzer
+# compassanalyzer <a href="https://github.com/thereallda/compassanalyzer"><img src="man/figures/logo.jpg" alt="CompassAnalyzer" align="right" height="138"/></a>
 
 <!-- badges: start -->
 <!-- badges: end -->
-
 
 ## Installation
 
@@ -48,6 +47,9 @@ library(compassanalyzer)
 ```{r}
 counts_df <- read.csv("data/Counts1.csv", row.names = 1)
 meta <- read.csv("data/metadata1.csv")
+head(meta)
+# rownames of metadata should be consistent with the colnames of counts_mat
+rownames(meta) <- meta$id
 
 # metadata for synthetic RNA
 syn_id <- paste("syn",3:7, sep = "_")
@@ -60,17 +62,16 @@ syn_meta <- data.frame(
 ### Filtering 
 
 ```{r}
-counts_keep <- enONE::FilterLowExprGene(counts_df, 
-                                 group = meta$condition,
-                                 min.count = 20)
+counts_keep <- enONE::FilterLowExprGene(counts_df,
+                                        group = meta$condition,
+                                        min.count = 20)
 ```
 
 ### Create object
 
 ```{r}
 Compass <- createCompass(counts_keep,
-                         bio.group = meta$condition,
-                         enrich.group = meta$enrich,
+                         col.data = meta,
                          spike.in.prefix = "^FB",
                          input.id = "Input",
                          enrich.id = "Enrich",
