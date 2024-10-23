@@ -9,6 +9,7 @@ setClass(
     norm_factors = "list",
     ratio = "list",
     ratio_filtered = "list",
+    ratio_shrunk = "list",
     parameter = "list"
   )
 )
@@ -35,6 +36,7 @@ setClass(
 #'   \code{norm_factors} list for holding normalization factors of sample and spike_in.
 #'   \code{ratio} list for holding the ratio of all genes.
 #'   \code{ratio_filtered} lists for holding the ratio of genes with ratios smaller than 1 in all samples.
+#'   \code{ratio_shrunk} lists for holding the ratio after shrinkage.
 #'   \code{parameter} list of parameters.
 #'
 #' @export
@@ -62,8 +64,8 @@ createCompass <- function(data,
   # create Assay object
   ## count_assay is a list for holding raw/normalized counts of sample and spike_in
   count_assay <- list(sample = list(), spike_in = list())
-  ## ratio_assay and ratio_filtered_assay are data.frame for holding all/filtered ratio
-  ratio_assay <- ratio_filtered_assay <- list(sample=data.frame(), spike_in=data.frame())
+  ## ratio_assay, ratio_filtered_assay and ratio_shrunk_assay are data.frame for holding all/filtered ratio
+  ratio_assay <- ratio_filtered_assay <- ratio_shrunk_assay <- list(sample=data.frame(), spike_in=data.frame())
 
   # norm_factors slot
   norm_factors <- list(sample = list(), spike_in = list())
@@ -108,6 +110,7 @@ createCompass <- function(data,
                        norm_factors = norm_factors,
                        ratio = ratio_assay,
                        ratio_filtered = ratio_filtered_assay,
+                       ratio_shrunk = ratio_shrunk_assay,
                        parameter = params
                        )
 

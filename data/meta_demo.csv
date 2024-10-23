@@ -1,0 +1,13 @@
+id,condition,replicate,enrich,biology
+Y1.CRNT,Young.Input,1,Input,Young
+Y2.CRNT,Young.Input,2,Input,Young
+Y3.CRNT,Young.Input,3,Input,Young
+O1.CRNT,Old.Input,1,Input,Old
+O2.CRNT,Old.Input,2,Input,Old
+O3.CRNT,Old.Input,3,Input,Old
+Y1.YCNT,Young.Enrich,1,Enrich,Young
+Y2.YCNT,Young.Enrich,2,Enrich,Young
+Y3.YCNT,Young.Enrich,3,Enrich,Young
+O1.YCNT,Old.Enrich,1,Enrich,Old
+O2.YCNT,Old.Enrich,2,Enrich,Old
+O3.YCNT,Old.Enrich,3,Enrich,Old

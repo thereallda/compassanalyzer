@@ -44,5 +44,6 @@ Description of each slot:
 \code{norm_factors} list for holding normalization factors of sample and spike_in.
 \code{ratio} list for holding the ratio of all genes.
 \code{ratio_filtered} lists for holding the ratio of genes with ratios smaller than 1 in all samples.
+\code{ratio_shrunk} lists for holding the ratio after shrinkage.
 \code{parameter} list of parameters.
 }

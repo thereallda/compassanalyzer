@@ -1,5 +1,7 @@
 ---
-output: github_document
+output:   
+  md_document:
+    pandoc_args: ["--wrap=preserve"]
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -45,17 +47,17 @@ library(compassanalyzer)
 ### Load data
 
 ```{r}
-counts_df <- read.csv("data/Counts1.csv", row.names = 1)
-meta <- read.csv("data/metadata1.csv")
+counts_df <- read.csv("data/Counts_demo.csv", row.names = 1)
+meta <- read.csv("data/meta_demo.csv")
 head(meta)
 # rownames of metadata should be consistent with the colnames of counts_mat
 rownames(meta) <- meta$id
 
 # metadata for synthetic RNA
-syn_id <- paste("syn",3:7, sep = "_")
+syn_id <- paste("syn",1:4, sep = "_")
 syn_meta <- data.frame(
   id = syn_id,
-  per = c(0.05,0.01,0.20,0,0.10)
+  per = c(0.05,0.01,0.20,0)
 )
 ```
 
@@ -79,16 +81,54 @@ Compass <- createCompass(counts_keep,
 
 ```
 
-### Calculate Ratio
+### Use enONE to perform RUV normalization
 
 ```{r}
-Compass <- CompassAnalyze(Compass)
-qratio_df <- getRatio(Compass, slot = "sample", filter = T)
-head(qratio_df);dim(qratio_df)
+Enone <- createEnone(data = counts_keep,
+                     col.data = meta,
+                     spike.in.prefix = "FB",
+                     input.id = "Input",
+                     enrich.id = "Enrich"
+)
+Enone <- enONE(Enone,
+               scaling.method = c("TMM"),
+               ruv.norm = TRUE, ruv.k = 3,
+               eval.pam.k = 2:4, eval.pc.n = 3,
+               return.norm = TRUE
+)
+# use RUVs_k3
+norm.factors <- enONE::getFactor(Enone, slot="sample", method="TMM_RUVs_k3")
+names(norm.factors)
+```
+
+### Calculate Ratio
+
+RUV factors from enONE can be passed into CompassAnalyze for ratio calculation.
+
+To obtain further accurate NCIN capping ratio, `ratio.shrinkage = TRUE` can be applied. 
+
+```{r}
+Compass <- CompassAnalyze(Compass,
+                           adjust = TRUE,
+                           prop.top.enrich = 0.8,
+                           decreasing = TRUE,
+                           pseudo.count = 1,
+                           enone.ruv.factor = norm.factors,
+                           ratio.shrinkage = TRUE)
+# prior ratio
+ratio_pri_df <- getRatio(Compass, slot = "sample", ratio.shrinkage = F, filter = T)
+head(ratio_pri_df)
+
+# To get shrunk ratio
+qratio_ls <- getRatio(Compass, slot = "sample", ratio.shrinkage = T, filter = T)
+names(qratio_ls)
+head(qratio_ls$Young)
 ```
 
 ### Synthetic RNA Calibration curve
 
 ```{r}
-synScatter(ratio.df = qratio_df, syn.meta = syn_meta)
+syn_ratio <- synRatio(Compass, ratio.shrinkage=TRUE, syn.meta = syn_meta)
+head(syn_ratio)
+synScatter(ratio.df = syn_ratio, syn.meta = syn_meta)
 ```

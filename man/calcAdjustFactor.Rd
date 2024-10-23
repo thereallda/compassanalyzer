@@ -12,7 +12,7 @@ calcAdjustFactor(
   enrich.id = "Enrich",
   scale.factor,
   prop.top.enrich = 1,
-  top.down = TRUE,
+  decreasing = TRUE,
   pseudo.count = 1
 )
 }
@@ -34,8 +34,8 @@ number of samples and p is the number of features.}
 \item{prop.top.enrich}{Proportion of top-enriched genes to use for
 adjustment of non-specific enrichment, by default all genes are used.}
 
-\item{top.down}{Whether using top-to-down or down-to-top enriched genes for
-the adjustment of non-specific enrichment, default: TRUE (top-down)}
+\item{decreasing}{Whether using decreasing enriched genes for
+the adjustment of non-specific enrichment, default: TRUE (decreasing)}
 
 \item{pseudo.count}{A numeric scalar of pseudo-counts to be added to each gene, default: 1.}
 }

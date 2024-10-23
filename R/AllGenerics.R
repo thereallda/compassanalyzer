@@ -20,4 +20,4 @@ setGeneric("getParameter", function(object, name) standardGeneric("getParameter"
 
 #' @rdname getRatio
 #' @export
-setGeneric("getRatio", function(object, slot=c("sample","spike_in"), filter=FALSE) standardGeneric("getRatio"))
+setGeneric("getRatio", function(object, slot=c("sample","spike_in"), filter=FALSE, ratio.shrinkage=FALSE) standardGeneric("getRatio"))

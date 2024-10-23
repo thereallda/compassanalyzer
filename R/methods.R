@@ -1,26 +1,26 @@
-#' Accessor for the "counts" slot of Compass object. 
+#' Accessor for the "counts" slot of Compass object.
 #'
-#' @param object Compass. 
-#' @param slot Which slot to get, one of \code{sample} or \code{spike_in}.  
-#' @param method Which counts matrix to get, must be one of the raw or normalized counts matrix presented in the selected slot. 
-#' @param value Raw or normalized counts matrix. 
+#' @param object Compass.
+#' @param slot Which slot to get, one of \code{sample} or \code{spike_in}.
+#' @param method Which counts matrix to get, must be one of the raw or normalized counts matrix presented in the selected slot.
+#' @param value Raw or normalized counts matrix.
 #' @name Counts
-#' @aliases Counts Counts,Compass,character,character-method 
+#' @aliases Counts Counts,Compass,character,character-method
 #' Counts<-,Compass,character,character,matrix-method
-#' 
-#' @return matrix. 
+#'
+#' @return matrix.
 #' @export
 #'
-setMethod("Counts", signature = signature(object="Compass", slot="character", method="character"), 
+setMethod("Counts", signature = signature(object="Compass", slot="character", method="character"),
           function(object, slot=c("sample","spike_in"), method) {
-            
+
             slot <- match.arg(slot, choices = c("sample","spike_in"))
-            
+
             if (is.null(names(object@counts[[slot]]))) {
               stop("Normalizations for ", slot, " not found. At least one normalization should be performed.")
             }
             method <- match.arg(method, choices = names(object@counts[[slot]]))
-            
+
             object@counts[[slot]][[method]]
             })
 
@@ -38,13 +38,13 @@ setReplaceMethod("Counts", signature = signature(object="Compass", slot="charact
 
 #' Accessor of Compass normalization factors
 #'
-#' @param object Compass. 
-#' @param slot Which slot to get, one of \code{sample} or \code{spike_in}.  
-#' @param method Which normalization methods to get, must be one of the methods presented in the selected slot. 
+#' @param object Compass.
+#' @param slot Which slot to get, one of \code{sample} or \code{spike_in}.
+#' @param method Which normalization methods to get, must be one of the methods presented in the selected slot.
 #' @name getFactor
 #' @aliases getFactor getFactor,Compass,character,character-method
 #'
-#' @return vector or list of factors. 
+#' @return vector or list of factors.
 #' @export
 #'
 setMethod("getFactor", signature = signature(object="Compass", slot="character", method="character"),
@@ -56,12 +56,12 @@ setMethod("getFactor", signature = signature(object="Compass", slot="character",
 
 #' Accessor of Compass parameter
 #'
-#' List all parameters. 
+#' List all parameters.
 #'
-#' @param object Compass. 
+#' @param object Compass.
 #' @name getParameter
 #' @aliases listParameter listParameter,Compass-method
-#' 
+#'
 #' @return Vector of parameter names
 #' @export
 setMethod("listParameter", signature = signature(object="Compass"),
@@ -73,13 +73,13 @@ setMethod("listParameter", signature = signature(object="Compass"),
 #' Accessor of Compass parameter
 #'
 #' Get specific parameter.
-#'  
-#' @param object Compass. 
-#' @param name Name of the parameter. 
+#'
+#' @param object Compass.
+#' @param name Name of the parameter.
 #' @name getParameter
 #' @aliases getParameter getParameter,Compass,character-method
-#' 
-#' @return Vector of parameter 
+#'
+#' @return Vector of parameter
 #' @export
 #'
 setMethod("getParameter", signature = signature(object="Compass", name="character"),
@@ -90,21 +90,33 @@ setMethod("getParameter", signature = signature(object="Compass", name="characte
 #' Accessor of ratio
 #'
 #' Get all or filtered ratio
-#'  
-#' @param object Compass. 
-#' @param slot Which slot to get, one of \code{sample} or \code{spike_in}.  
-#' @param filter Whether to get the filtered ratio, default FALSE. 
+#'
+#' @param object Compass.
+#' @param slot Which slot to get, one of \code{sample} or \code{spike_in}.
+#' @param filter Whether to get the filtered ratio, default FALSE.
+#' @param ratio.shrinkage Whether to get the shrunk ratio, default FALSE.
 #' @name getRatio
 #' @aliases getRatio getRatio,Compass,character-method
-#' 
-#' @return list of ratio table 
+#'
+#' @return list of ratio table
 #' @export
 #'
 setMethod("getRatio", signature = signature(object="Compass", slot="character"),
-          function(object, slot=c("sample","spike_in"), filter=FALSE) {
-            if (filter) {
-              object@ratio_filtered[[slot]]
+          function(object, slot=c("sample","spike_in"), filter=FALSE, ratio.shrinkage=FALSE) {
+            if (ratio.shrinkage) {
+              ratio_shrunk_ls <- object@ratio_shrunk[[slot]]
+              if (filter) {
+                ratio_shrunk_ls <- lapply(ratio_shrunk_ls, function(x) {subset(x, ratio.shrunk<1)})
+              }
+              return(ratio_shrunk_ls)
             } else {
-              object@ratio[[slot]]
+              if (filter) {
+                return(object@ratio_filtered[[slot]])
+              } else {
+                return(object@ratio[[slot]])
+              }
             }
           })
+
+## getRatio
+utils::globalVariables(c("ratio.shrunk"))

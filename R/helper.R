@@ -15,27 +15,21 @@
 #' @importFrom scales percent
 synScatter <- function(ratio.df, syn.meta) {
 
-  ratio_long <- ratio.df[syn.meta$id,] %>%
-    as.data.frame() %>%
-    tibble::rownames_to_column("id") %>%
-    tidyr::pivot_longer(cols = -id,
-                 names_to = "sample",
-                 values_to = "ratio") %>%
-    dplyr::left_join(syn.meta, by = "id")
-
-  cor_value <- stats::cor.test(ratio_long$ratio, ratio_long$per)
+  cor_value <- stats::cor.test(ratio.df$ratio, ratio.df$per)
   cor_label <- paste0("R = ", round(cor_value$estimate,3), "; P = ", signif(cor_value$p.value,3))
 
   # get limits of x and y
-  limits.xy <- range(c(ratio_long$per,ratio_long$ratio))
+  limits.xy <- range(c(ratio.df$per,ratio.df$ratio+ratio.df$ratio.se))
 
   # expand the range to draw error bar
   limits.xy <- c(limits.xy[1]-0.01, limits.xy[2]+0.01)
 
-  p1 <- ggplot(ratio_long, aes(per, ratio)) +
-    stat_summary(geom = "point", fun = mean) +
-    stat_summary(fun.data = mean_se, width = 0.008, geom = "errorbar") +
-    geom_abline(slope=1) +
+  p1 <- ggplot(ratio.df, aes(per, ratio)) +
+    geom_point() +
+    # se error bar
+    geom_errorbar(aes(ymin=ratio-ratio.se,
+                      ymax=ratio+ratio.se), width = 0.008) +
+    geom_abline(slope=1, linetype='dashed') +
     theme_classic() +
     theme(axis.text = element_text(color="black")) +
     scale_x_continuous(limits = limits.xy, labels = scales::percent) +
@@ -73,6 +67,54 @@ addPseudoCount <- function(data, pseudo.count = 1) {
   return(data.adj)
 }
 
+
+#' Calculation of synthetic spike-in ratio
+#'
+#' @param object Compass object.
+#' @param ratio.shrinkage Whether to perform shrinkage of ratio, default TRUE.
+#' @param syn.meta data.frame of metadata of synthetic spike-ins.
+#'
+#' @return data.frame of synthetic spike-in ratio
+#' @export
+#'
+#' @importFrom dplyr left_join
+#' @importFrom stats sd
+synRatio <- function(object, syn.meta, ratio.shrinkage = TRUE) {
+  if (is.null(object@ratio) | is.null(object@ratio_shrunk)) {
+    stop("Pleass run CompassAnalyzer before calculating synthetic spike-in ratios.")
+  }
+  syn_id <- object@parameter$synthetic.id
+  # get prior ratio
+  ratio_prior <- object@ratio$sample
+  n_samples <- ncol(ratio_prior)
+  if (ratio.shrinkage) {
+    ratio_shrunk_ls <- ratioShrinkage(ratio_prior, bio.group = NULL)
+    ratio_shrunk <- ratio_shrunk_ls[[1]]
+    ratio_df <- ratio_shrunk[,c("GeneID","ratio.shrunk","ratio.shrunk.sd")]
+    ratio_df$ratio.shrunk.se <- ratio_df$ratio.shrunk.sd/sqrt(n_samples)
+    syn_ratio_df <- subset(ratio_df, GeneID %in% syn_id)
+    colnames(syn_ratio_df) <- c("GeneID","ratio","ratio.sd","ratio.se")
+  } else {
+    ratio_sd <- apply(ratio_prior, 1, stats::sd)
+    ratio_se <- ratio_sd/sqrt(n_samples)
+
+    ratio_df <- data.frame(
+      GeneID = rownames(ratio_prior),
+      ratio = rowMeans(ratio_prior),
+      ratio.sd = ratio_sd,
+      ratio.se = ratio_se
+    )
+    syn_ratio_df <- subset(ratio_df, GeneID %in% syn_id)
+  }
+
+  # merge with syn.meta
+  syn_ratio_df <- left_join(syn_ratio_df, syn.meta, by=c('GeneID'='id'))
+
+  return(syn_ratio_df)
+}
+
 # For adjusting no visible binding
 ## synScatter
-utils::globalVariables(c("per", "ratio"))
+utils::globalVariables(c("per", "ratio","ratio.se"))
+## synRatio
+utils::globalVariables(c("GeneID"))

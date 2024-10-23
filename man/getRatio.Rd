@@ -5,9 +5,19 @@
 \alias{getRatio,Compass,character-method}
 \title{Accessor of ratio}
 \usage{
-getRatio(object, slot = c("sample", "spike_in"), filter = FALSE)
+getRatio(
+  object,
+  slot = c("sample", "spike_in"),
+  filter = FALSE,
+  ratio.shrinkage = FALSE
+)
 
-\S4method{getRatio}{Compass,character}(object, slot = c("sample", "spike_in"), filter = FALSE)
+\S4method{getRatio}{Compass,character}(
+  object,
+  slot = c("sample", "spike_in"),
+  filter = FALSE,
+  ratio.shrinkage = FALSE
+)
 }
 \arguments{
 \item{object}{Compass.}
@@ -15,6 +25,8 @@ getRatio(object, slot = c("sample", "spike_in"), filter = FALSE)
 \item{slot}{Which slot to get, one of \code{sample} or \code{spike_in}.}
 
 \item{filter}{Whether to get the filtered ratio, default FALSE.}
+
+\item{ratio.shrinkage}{Whether to get the shrunk ratio, default FALSE.}
 }
 \value{
 list of ratio table

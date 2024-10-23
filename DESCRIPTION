@@ -1,6 +1,6 @@
 Package: compassanalyzer
 Title: Quantification of NCIN-cap ratio
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
     person(given = "Dean",
            family = "Li",
@@ -11,7 +11,7 @@ Description: compassanalyzer is an R package for computing the ratio of
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.1
+RoxygenNote: 7.3.2
 Imports: 
     dplyr,
     edgeR,
@@ -24,5 +24,6 @@ Imports:
     methods,
     enONE,
     S4Vectors,
-    SummarizedExperiment
+    SummarizedExperiment,
+    ashr
 Remotes: thereallda/enONE
