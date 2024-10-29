@@ -54,7 +54,7 @@ CompassAnalyze <- function(object,
                                    )
   counts_sam_scale <- t(t(counts_sam) * scale_factors)
 
-  # Linear regression-based adjustment
+  # adjustment
   if (adjust) {
     cat("Adjustment...\n")
     adjust_factors <- calcAdjustFactor(data,
@@ -87,6 +87,18 @@ CompassAnalyze <- function(object,
                        pseudo.count = pseudo.count
   )
 
+  # return RUV counts
+  if (!is.null(enone.ruv.factor) & !is.null(counts_sam_adjust)) {
+    # check ruv factors
+    if (is.null(enone.ruv.factor$adjustFactor) | is.null(enone.ruv.factor$alpha)) {
+      stop("`adjustFactor` or `alpha` should be presented in `enone.ruv.factor`")
+    }
+    Y <- t(log2(counts_sam_adjust+1))
+    # RUV
+    counts_sam_ruv <- 2^(Y - enone.ruv.factor$adjustFactor %*% enone.ruv.factor$alpha[,colnames(Y)])
+    counts_sam_ruv <- t(counts_sam_ruv)
+  }
+
   # ratio shrinkage
   if (ratio.shrinkage) {
     ratio_shrunk_ls <- ratioShrinkage(ratio_ls[["ratio"]],
@@ -106,7 +118,8 @@ CompassAnalyze <- function(object,
 
   # save results in object
   object@norm_factors[["sample"]] <- list("scaled" = scale_factors,
-                                          "adjusted" = adjust_factors)
+                                          "adjusted" = adjust_factors,
+                                          "RUV" = enone.ruv.factor)
 
   object@ratio[["sample"]] <- ratio_ls$ratio
   object@ratio_filtered[["sample"]] <- ratio_ls$ratio_filtered
@@ -128,6 +141,8 @@ CompassAnalyze <- function(object,
   # store normalized count matrix
   Counts(object, slot = "sample", method = "scaled") <- counts_sam_scale
   Counts(object, slot = "sample", method = "adjusted") <- counts_sam_adjust
+  Counts(object, slot = "sample", method = "RUV") <- counts_sam_ruv
+
 
   validObject(object)
   return(object)
@@ -241,7 +256,7 @@ calcAdjustFactor <- function(data,
   # create centroid based on non-specific enriched genes from input samples
   counts_scale_neg <- counts_sam_scale[rownames(neg_all),]
   centroid <- rowMeans(counts_scale_neg[, input.idx])
-  adjust.factor <- 2^colMeans(centroid-log2(counts_scale_neg))
+  adjust.factor <- 2^colMeans(log2(centroid)-log2(counts_scale_neg))
 
   return(adjust.factor)
 }
