@@ -35,7 +35,11 @@ CompassAnalyze <- function(object,
 
   input.idx <- grep(input.id, enrich.group)
   enrich.idx <- grep(enrich.id, enrich.group)
-  bio.group <- object$biology[enrich.idx]
+  if (!is.null(object$biology)) {
+    bio.group <- object$biology[enrich.idx]
+  } else {
+    bio.group <- rep(1,length(enrich.idx))
+  }
 
   # get counts
   data <- SummarizedExperiment::assay(object)
