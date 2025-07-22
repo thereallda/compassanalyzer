@@ -54,12 +54,12 @@ library(compassanalyzer)
 
 For this tutorial, we will demonstrate the `compassanalyzer` workflow by using a CompasSeq data from mouse livers.
 
-Notably, we included three types of spike-in RNAs:
+Notably, we included two types of spike-in RNAs:
 
 -   Total RNAs from Drosophila melanogaster, an invertebrate model organism with well-annotated genome sequence, for estimating the unwanted variation;
--   Synthetic RNAs, consisting of 0%, 1%, 5%, and 20% NAD-capping, for assessing the quantification accuracy of `compassanalyzer`
+-   Synthetic RNAs, consisting of 0%, 1%, 5%, and 20% NAD-RNA, for assessing the quantification accuracy of `compassanalyzer`
 
-![](images/clipboard-2846333921.png)
+![](images/clipboard-3176327901.png){width="700"}
 
 ```{r}
 counts_df <- read.csv("data/Counts_demo.csv", row.names = 1)

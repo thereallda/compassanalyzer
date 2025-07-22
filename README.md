@@ -23,7 +23,7 @@ You can install the development version of compassanalyzer like so:
 `compassanalyzer` relies on `enONE` to perform RUV normalization to estimate unwanted variation. Please make sure you have installed the `enONE` package.
 
     library(tidyverse)
-
+    
     # if you do not have `enONE` package installed, run the following code first: 
     # devtools::install_github("thereallda/enONE")
     if (!requireNamespace("enONE", quietly = TRUE)) { devtools::install_github("thereallda/enONE") }
@@ -34,12 +34,12 @@ You can install the development version of compassanalyzer like so:
 
 For this tutorial, we will demonstrate the `compassanalyzer` workflow by using a CompasSeq data from mouse livers.
 
-Notably, we included three types of spike-in RNAs:
+Notably, we included two types of spike-in RNAs:
 
 -   Total RNAs from Drosophila melanogaster, an invertebrate model organism with well-annotated genome sequence, for estimating the unwanted variation;
--   Synthetic RNAs, consisting of 0%, 1%, 5%, and 20% NAD-capping, for assessing the quantification accuracy of `compassanalyzer`
+-   Synthetic RNAs, consisting of 0%, 1%, 5%, and 20% NAD-RNA, for assessing the quantification accuracy of `compassanalyzer`
 
-![](images/clipboard-2846333921.png)
+<img src="images/clipboard-3176327901.png" width="700" />
 
     counts_df <- read.csv("data/Counts_demo.csv", row.names = 1)
     meta <- read.csv("data/meta_demo.csv")
@@ -53,7 +53,7 @@ Notably, we included three types of spike-in RNAs:
     #> 6 O3.CRNT   Old.Input         3  Input     Old
     # rownames of metadata should be consistent with the colnames of counts_mat
     rownames(meta) <- meta$id
-
+    
     # metadata for synthetic RNA
     syn_id <- paste("syn",1:4, sep = "_")
     syn_meta <- data.frame(
@@ -154,7 +154,7 @@ To obtain further accurate NCIN capping ratio, `ratio.shrinkage = TRUE` can be a
     #> ENSMUSG00000048538 0.16897713
     #> ENSMUSG00000057363 0.31397557
     #> ENSMUSG00000033021 0.09994700
-
+    
     # To get shrunk ratio
     qratio_ls <- getRatio(Compass, slot = "sample", ratio.shrinkage = T, filter = T)
     names(qratio_ls)
