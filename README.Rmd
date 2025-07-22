@@ -18,7 +18,12 @@ knitr::opts_chunk$set(
 # compassanalyzer <a href="https://github.com/thereallda/compassanalyzer"><img src="man/figures/logo.jpg" alt="CompassAnalyzer" align="right" height="138"/></a>
 
 <!-- badges: start -->
+
 <!-- badges: end -->
+
+`compassanalyzer` quantifies the non-canonical initiating nucleotide (NCIN) capping ratio at transcript-resolution using CompasSeq data. In brief, `compassanalyzer` employs stepwise normalization to account for unwanted technical variation across samples and employs an empirical Bayes shrinkage approach to estimate transcript-specific NCIN capping ratios across the epitranscriptome.
+
+For a more detailed description of `compassanalyzer`, check out our publication **"CompasSeq: epitranscriptome-wide percentage assessment of metabolite-capped RNA at the transcript resolution"** in Nature Communications (<DOI:10.1038/s41467-025-61697-y>). Please cite this article if you use `compassanalyzer` in your studies, and we'd be very grateful!
 
 ## Installation
 
@@ -27,11 +32,13 @@ You can install the development version of compassanalyzer like so:
 ``` r
 # install.packages("devtools")
 devtools::install_github("thereallda/compassanalyzer")
-
 ```
 
 ## Quick Start
+
 ### Load package
+
+`compassanalyzer` relies on `enONE` to perform RUV normalization to estimate unwanted variation. Please make sure you have installed the `enONE` package.
 
 ```{r,warning=FALSE,message=FALSE}
 library(tidyverse)
@@ -43,8 +50,16 @@ library(enONE)
 library(compassanalyzer)
 ```
 
-
 ### Load data
+
+For this tutorial, we will demonstrate the `compassanalyzer` workflow by using a CompasSeq data from mouse livers.
+
+Notably, we included three types of spike-in RNAs:
+
+-   Total RNAs from Drosophila melanogaster, an invertebrate model organism with well-annotated genome sequence, for estimating the unwanted variation;
+-   Synthetic RNAs, consisting of 0%, 1%, 5%, and 20% NAD-capping, for assessing the quantification accuracy of `compassanalyzer`
+
+![](images/clipboard-2846333921.png)
 
 ```{r}
 counts_df <- read.csv("data/Counts_demo.csv", row.names = 1)
@@ -61,7 +76,9 @@ syn_meta <- data.frame(
 )
 ```
 
-### Filtering 
+### Filtering
+
+We consider genes with at least 20 counts in more than 2 samples.
 
 ```{r}
 counts_keep <- enONE::FilterLowExprGene(counts_df,
@@ -70,6 +87,14 @@ counts_keep <- enONE::FilterLowExprGene(counts_df,
 ```
 
 ### Create object
+
+When constructing `Compass` object, we can provide following arguments:
+
+-   Prefix of spike-in genes (`spike.in.prefix = "^FB"`);
+
+-   The id of synthetic spike-in (`synthetic.id = c("syn_1", "syn_2", "syn_3", "syn_4")`), which should be consistent with row names in `counts_mat`;
+
+-   The id of input (`input.id = "Input"`) and enrichment (`enrich.id = "Enrich"`), same as the enrich column.
 
 ```{r}
 Compass <- createCompass(counts_keep,
@@ -81,7 +106,7 @@ Compass <- createCompass(counts_keep,
 
 ```
 
-### Use enONE to perform RUV normalization
+### Using enONE to perform RUV normalization
 
 ```{r}
 Enone <- createEnone(data = counts_keep,
@@ -103,9 +128,9 @@ names(norm.factors)
 
 ### Calculate Ratio
 
-RUV factors from enONE can be passed into CompassAnalyze for ratio calculation.
+RUV factors from `enONE` can be passed into `compassanalyzer` for ratio calculation.
 
-To obtain further accurate NCIN capping ratio, `ratio.shrinkage = TRUE` can be applied. 
+To obtain further accurate NCIN capping ratio, `ratio.shrinkage = TRUE` can be applied.
 
 ```{r}
 Compass <- CompassAnalyze(Compass,
@@ -126,6 +151,8 @@ head(qratio_ls$Young)
 ```
 
 ### Synthetic RNA Calibration curve
+
+Finally, we can use synthetic RNAs with known capping ratio to check the accuracy of our quantification.
 
 ```{r}
 syn_ratio <- synRatio(Compass, ratio.shrinkage=TRUE, syn.meta = syn_meta)
